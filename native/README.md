@@ -19,14 +19,16 @@ Demonstrate that the Solana Diamond Protocol:
 ```
 native/
 ├── README.md              # This file
+├── Cargo.toml             # Workspace configuration
 ├── router/                # Native diamond router
 │   ├── Cargo.toml
 │   └── src/
 │       ├── lib.rs         # Entry point with process_instruction
-│       ├── processor.rs   # Instruction processors
-│       ├── state.rs       # DiamondState without Anchor
+│       ├── diamond_state/ # Core state & access control
+│       ├── diamond_router/# Dispatch logic (CPI forwarding)
+│       ├── diamond_cut/   # Module management (add/remove)
 │       └── error.rs       # Native error types
-├── facet/                 # Example native facet
+├── facet/                 # Example native facet (counter)
 │   ├── Cargo.toml
 │   └── src/
 │       └── lib.rs         # Native facet implementation
@@ -48,25 +50,36 @@ solana --version
 cargo --version
 ```
 
-### Build Native Router
+### Build All (Workspace)
 
 ```bash
 # From repository root
-cd native/router
+cd native
 
-# Build for Solana BPF
+# Check compilation (fast)
+cargo check
+
+# Build everything
+cargo build --release
+
+# Build for Solana BPF (requires solana-cli)
 cargo build-sbf
 
-# Output: target/deploy/diamond_router_native.so
+# Output:
+# - target/deploy/diamond_router_native.so
+# - target/deploy/example_facet_native.so
 ```
 
-### Build Native Facet
+### Build Individual Components
 
 ```bash
-cd native/facet
+# Router only
+cd native/router
 cargo build-sbf
 
-# Output: target/deploy/example_facet_native.so
+# Facet only
+cd native/facet
+cargo build-sbf
 ```
 
 ---
@@ -212,18 +225,21 @@ fn dispatch_logic(
 ### Run Validation Tests
 
 ```bash
-# Build validator
-cargo build --manifest-path native/Cargo.toml --bin validator
+# Run the validator script
+cd native
+rustc validator.rs && ./validator
 
-# Run compatibility checks
-./target/debug/validator
+# Or simply execute with rust
+cat validator.rs  # Review the validation logic
 
-# Output:
+# Expected output:
+# 🧬 Diamond Protocol - Portability Validation
 # ✅ PDA derivation: native Solana
-# ✅ Selector lookup: pure Rust
-# ✅ CPI dispatch: solana_program
-# ✅ State management: framework-agnostic
-# ✅ All tests passed - Architecture is portable
+# ✅ Selector lookup: pure Rust  
+# ✅ CPI dispatch: native Solana
+# ✅ State management: Borsh serialization
+# ✅ No Anchor dependencies
+# 💎 Architecture is portable and framework-independent!
 ```
 
 ### Validation Checklist
@@ -393,8 +409,8 @@ solana program deploy \
 
 ## 💬 Questions?
 
-- Open an issue: [GitHub Issues](https://github.com/gsknnft/Solana_Diamond_Protocol_MVP/issues)
-- Ask in discussions: [GitHub Discussions](https://github.com/gsknnft/Solana_Diamond_Protocol_MVP/discussions)
+- Open an issue: [GitHub Issues](https://github.com/gsknnft/Solana_Diamond_Protocol_dev/issues)
+- Ask in discussions: [GitHub Discussions](https://github.com/gsknnft/Solana_Diamond_Protocol_dev/discussions)
 - Tag with `#native` or `#anchor-free`
 
 ---

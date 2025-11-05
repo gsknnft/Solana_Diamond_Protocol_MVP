@@ -1,416 +1,276 @@
-# Solana Diamond Protocol 💎
+# Solana Diamond Protocol MVP
 
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
-![Rust](https://img.shields.io/badge/rust-1.87.0-orange)
-![Anchor](https://img.shields.io/badge/anchor-0.31.1-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+A **minimal, production-ready** implementation of the EIP-2535 Diamond Standard for Solana, demonstrating both **Anchor** and **native Rust** approaches.
 
-**A canonical, production-ready implementation of the EIP-2535 Diamond Standard for Solana**
+## 🎯 What's Inside
 
-Bringing Ethereum's Diamond Standard to Solana with native CPI-based facet routing, PDA state management, and independent program upgrades. This implementation enables modular, upgradeable smart contract architecture with hot-swappable facets while maintaining the core principles of EIP-2535.
+This MVP package contains two complete implementations:
 
-> 📚 **New to Diamond?** Start with [README.diamond.md](./README.diamond.md) for a comprehensive MVP overview.
->
-> 🎨 **Want to visualize the architecture?** See [FLOW_DIAGRAM.md](./FLOW_DIAGRAM.md) for detailed flow diagrams.
->
-> 🤝 **Ready to contribute?** Check out [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+### 1. Anchor Version (`programs/sol_diamond/`)
+A minimal Anchor-based diamond router with:
+- **diamond_state/** - Core state & access control
+- **diamond_router/** - CPI-based dispatch logic  
+- **diamond_cut/** - Dynamic facet management
+- **error.rs** - Error definitions
 
-## Branch Strategy
-- **main** → Stable baseline, pinned to Anchor 0.31.1 for Solana 2.x compatibility.
-- **diamond-erc2535** → Experimental branch with ERC‑2535 Diamond Standard implementation.
-  - Includes selector collision detection, immutability flags, and human‑readable mappings.
-  - Based on Anchor 0.32.1 with temporary compatibility fixes until 0.33.0.
+### 2. Native Version (`native/`)
+Pure Rust implementation proving framework independence:
+- **router/** - Native diamond router (no Anchor)
+- **facet/** - Example counter facet
+- Complete documentation and build tools
 
-## 🎯 Overview
+---
 
-The Solana Diamond Protocol provides a flexible framework for building complex, modular programs on Solana. It implements a proxy-style pattern where a central router dispatches calls to registered facet programs, allowing you to:
-
-- ✅ **Add functionality** without redeploying the main contract
-- ✅ **Upgrade modules** independently with zero downtime
-- ✅ **Organize code** into logical, maintainable facets
-- ✅ **Scale beyond** size limits with distributed logic
-- ✅ **Share state** across multiple programs efficiently
-
-## 🚀 Quick Start
-
-```bash
-# Clone and install
-git clone https://github.com/gsknnft/Solana_Diamond_Protocol_MVP.git
-cd Solana_Diamond_Protocol_MVP
-npm install
-
-# Build
-cargo build
-
-# Test
-anchor test
-```
-
-See [QUICKSTART.md](./QUICKSTART.md) for detailed setup instructions.
-
-## 📋 Features
-
-### Core Diamond Router
-- **Dynamic Dispatch**: Route instructions to registered facet programs via CPI
-- **Selector Registry**: Map 4-byte function selectors to program addresses
-- **Access Control**: Owner and admin-based permissions
-- **Capacity Management**: Bounded collections prevent stack overflow
-- **Safe Operations**: Validation ensures only registered facets are called
-
-### Architecture Highlights
-- **Modular Design**: Separate concerns into independent facets
-- **Upgradeable**: Hot-swap facets without touching the router
-- **Gas Efficient**: Optimized dispatch with O(n) lookup
-- **Production Ready**: Thoroughly tested and documented
-
-### Technical Specifications
-- Maximum 10 admins per diamond
-- Maximum 20 registered modules
-- Maximum 50 function selectors
-- Account size: 3,317 bytes
-- Stack-safe: All operations within Solana limits
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────┐
-│         Diamond Router (Main)           │
-│  ┌─────────────────────────────────┐   │
-│  │     Dispatch Mechanism          │   │
-│  │  1. Extract selector            │   │
-│  │  2. Lookup facet address        │   │
-│  │  3. Validate program ID         │   │
-│  │  4. Forward via CPI             │   │
-│  └─────────────────────────────────┘   │
-└─────────────────────────────────────────┘
-                    │
-        ┌───────────┼───────────┐
-        ▼           ▼           ▼
-   ┌────────┐  ┌────────┐  ┌────────┐
-   │ Facet  │  │ Facet  │  │ Facet  │
-   │   A    │  │   B    │  │   C    │
-   └────────┘  └────────┘  └────────┘
-```
-
-For detailed architecture documentation, see [ARCHITECTURE.md](./ARCHITECTURE.md).
-
-## 📦 Project Structure
+## 📦 Structure
 
 ```
 Solana_Diamond_Protocol_MVP/
 ├── programs/
-│   ├── sol_diamond/           # Main diamond router program
+│   └── sol_diamond/              # Minimal Anchor diamond router
+│       ├── src/
+│       │   ├── lib.rs            # Program entry point
+│       │   ├── diamond_state/    # Core state & access control
+│       │   ├── diamond_router/   # Dispatch logic
+│       │   ├── diamond_cut/      # Module management
+│       │   └── error.rs          # Error definitions
+│       └── Cargo.toml
+├── native/                        # Native Rust implementation
+│   ├── router/                    # Native diamond router
 │   │   ├── src/
-│   │   │   ├── lib.rs         # Program entry point
-│   │   │   ├── diamond_state/ # Core state & access control
-│   │   │   ├── diamond_router/# Dispatch logic
-│   │   │   ├── diamond_cut/   # Module management
-│   │   │   └── error.rs       # Error definitions
+│   │   │   ├── lib.rs
+│   │   │   ├── diamond_state/
+│   │   │   ├── diamond_router/
+│   │   │   ├── diamond_cut/
+│   │   │   └── error.rs
 │   │   └── Cargo.toml
-│   ├── rewards_facet/         # Example facet: IMG rewards
-│   └── lp_rewards_facet/      # Example facet: LP staking
-├── tests/
-│   └── sol_diamond.ts         # Integration tests
-├── ARCHITECTURE.md            # Detailed design docs
-├── QUICKSTART.md              # Setup guide
-└── README.md                  # This file
+│   ├── facet/                     # Example facet
+│   │   └── src/lib.rs
+│   ├── README.md
+│   ├── EXAMPLE.md
+│   └── build.sh
+├── Anchor.toml                    # Anchor configuration
+├── Cargo.toml                     # Workspace config
+└── README.md                      # This file
 ```
 
-## 🔧 Usage Example
+---
 
-### Initialize the Diamond
+## 🚀 Quick Start
 
-```typescript
-import * as anchor from "@coral-xyz/anchor";
+### Prerequisites
 
-const program = anchor.workspace.SolDiamond;
-const owner = anchor.web3.Keypair.generate();
+```bash
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-// Initialize diamond state
-await program.methods
-  .initializeDiamond(owner.publicKey, bump)
-  .accounts({
-    diamondState: diamondStatePDA,
-    payer: owner.publicKey,
-    systemProgram: SystemProgram.programId,
-  })
-  .signers([owner])
-  .rpc();
+# Install Solana
+sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+
+# Install Anchor
+cargo install --git https://github.com/coral-xyz/anchor --tag v0.31.1 anchor-cli
 ```
 
-### Register a Facet
+### Build Everything
 
-```typescript
-const facetProgramId = new PublicKey("YourFacetProgramID");
-const selector = [0x01, 0x02, 0x03, 0x04]; // 4-byte function selector
+```bash
+# Clone and enter directory
+cd Solana_Diamond_Protocol_MVP
 
-await program.methods
-  .addModule(facetProgramId, selector)
-  .accounts({
-    diamondState: diamondStatePDA,
-    authority: owner.publicKey,
-  })
-  .signers([owner])
-  .rpc();
+# Build Anchor version
+anchor build
+
+# Build native version
+cd native
+./build.sh
 ```
 
-### Dispatch to a Facet
+### Test Locally
 
-```typescript
-const ixData = Buffer.concat([
-  Buffer.from(selector),
-  Buffer.from(encodedArgs)
-]);
+```bash
+# Start local validator
+solana-test-validator
 
-await program.methods
-  .dispatch(Array.from(ixData))
-  .accounts({
-    routerConfig: diamondStatePDA,
-    module: facetProgramId,
-  })
-  .remainingAccounts([...facetAccounts])
-  .rpc();
+# In another terminal
+anchor test --skip-local-validator
 ```
+
+---
+
+## 🔍 Key Differences: Anchor vs Native
+
+### What's the Same (Core Logic)
+
+Both implementations share **identical dispatch logic**:
+
+```rust
+// 1. Extract selector from instruction data
+let selector: [u8; 4] = ix_data[..4].try_into()?;
+
+// 2. Lookup facet in registry
+let facet_program = state.get_facet_by_selector(selector)?;
+
+// 3. Validate and forward via CPI
+invoke(&Instruction {
+    program_id: facet_program,
+    accounts: remaining_accounts,
+    data: ix_data,
+}, remaining_accounts)?;
+```
+
+### What's Different (Boilerplate)
+
+| Aspect | Anchor | Native |
+|--------|--------|--------|
+| **Entry point** | `#[program]` macro | `entrypoint!()` + manual |
+| **Account parsing** | `#[derive(Accounts)]` | Manual `next_account_info()` |
+| **State** | `#[account]` | `BorshSerialize` + `BorshDeserialize` |
+| **Build** | `anchor build` | `cargo build-sbf` |
+| **Binary size** | ~150KB | ~80KB |
+
+---
+
+## 📚 Core Concepts
+
+### 1. Diamond State
+
+The central registry storing:
+- **Owner** - Who can modify the diamond
+- **Selectors** - Map of function selectors to facet programs
+- **Modules** - Metadata about registered facets
+- **Paused** - Emergency pause flag
+
+### 2. Dispatch Pattern
+
+```
+Client → Diamond Router → Selector Lookup → CPI to Facet
+```
+
+The router:
+1. Receives instruction with 4-byte selector
+2. Looks up which facet handles that selector
+3. Validates the provided facet matches registry
+4. Forwards the instruction via Cross-Program Invocation (CPI)
+
+### 3. Dynamic Facets
+
+Add/remove facets at runtime:
+- `add_facet()` - Register new functionality
+- `remove_facet()` - Remove functionality (unless immutable)
+
+---
+
+## 🎓 Learning Path
+
+### 1. Start with Anchor Version
+
+```bash
+# Build and explore
+anchor build
+code programs/sol_diamond/src/
+```
+
+**Key files to read:**
+1. `lib.rs` - Program structure
+2. `diamond_router/mod.rs` - Dispatch logic
+3. `diamond_state/mod.rs` - State management
+
+### 2. Compare with Native Version
+
+```bash
+cd native
+code router/src/
+```
+
+**Notice:**
+- Same folder structure (`diamond_state/`, `diamond_router/`, `diamond_cut/`)
+- Same core logic
+- Different entry point and account handling
+
+### 3. Run Examples
+
+```bash
+# See native/EXAMPLE.md for detailed examples
+cd native
+cat EXAMPLE.md
+```
+
+---
 
 ## 🧪 Testing
 
-Run the comprehensive test suite:
+### Anchor Tests
 
 ```bash
-# Unit tests
-cargo test
-
-# Integration tests with Anchor
 anchor test
-
-# Specific test file
-anchor test tests/sol_diamond.ts
-
-# Verbose output with logs
-anchor test -- --nocapture
 ```
 
-Tests cover:
-- Diamond initialization
-- Admin management
-- Module registration
-- Selector mapping
-- Dispatch routing
-- Access control
-- Capacity limits
-
-## 📦 Building & IDL Generation
-
-### Build Programs
+### Native Tests
 
 ```bash
-# Build all programs in workspace
-anchor build
+cd native
+cargo test
+```
 
-# Build specific program
-cargo build-sbf --manifest-path programs/sol_diamond/Cargo.toml
+### Integration Tests
 
-# Build for production (optimized)
+See `tests/` directory for end-to-end examples.
+
+---
+
+## 🔧 Building for Production
+
+### Anchor Version
+
+```bash
+anchor build --verifiable
+anchor deploy --provider.cluster mainnet
+```
+
+### Native Version
+
+```bash
+cd native
 cargo build-sbf --release
+solana program deploy target/deploy/diamond_router_native.so
 ```
 
-### Generate IDLs
+---
 
-Anchor automatically generates Interface Definition Language (IDL) files for client integration:
+## 📖 Documentation
 
-```bash
-# IDLs are generated during anchor build
-anchor build
+- **Anchor Implementation** - See `programs/sol_diamond/src/`
+- **Native Implementation** - See `native/README.md` and `native/EXAMPLE.md`
+- **Architecture Guide** - See `ARCHITECTURE.md` (in parent repo)
 
-# IDL files location
-ls -la target/idl/
-# - sol_diamond.json
-# - img_rewards_facet.json
-# - lp_rewards_facet.json
-```
+---
 
-### Using IDLs in Client Code
+## 🎯 Use Cases
 
-```typescript
-import { Program, AnchorProvider } from "@coral-xyz/anchor";
-import { IDL as DiamondIDL } from "./target/idl/sol_diamond";
+This MVP is perfect for:
 
-const provider = AnchorProvider.env();
-const program = new Program(DiamondIDL, provider);
+- ✅ **Learning** the diamond pattern on Solana
+- ✅ **Prototyping** modular protocols
+- ✅ **Comparing** Anchor vs native approaches
+- ✅ **Building** production diamond implementations
 
-// Now you have typed access to all instructions
-await program.methods.initializeDiamond(owner, bump).accounts({...}).rpc();
-```
-
-**IDL Configuration**: See `Anchor.toml` for IDL output settings:
-```toml
-[idl]
-out = "target/idl"
-```
-
-## 🛣️ Roadmap
-
-### Phase 1: Core Protocol ✅ COMPLETE
-- [x] Diamond router implementation
-- [x] Dispatch mechanism
-- [x] Access control
-- [x] Stack optimization
-- [x] Test suite
-- [x] Documentation
-
-### Phase 2: Facet Ecosystem (In Progress)
-- [ ] FacetRegistry PDA for scaling
-- [ ] DiamondCut facet for complex upgrades
-- [ ] CrossChainBridge facet (SigilNet integration)
-- [ ] Enhanced selector management
-
-### Phase 3: Advanced Features
-- [ ] LP rewards facet
-- [ ] Governance facet (DAO voting)
-- [ ] Snapshot facet (holder tracking)
-- [ ] Automated epoch management
-
-### Phase 4: Production Deployment
-- [ ] Security audit
-- [ ] Mainnet deployment
-- [ ] Community launch
-- [ ] SDK and tooling
-
-## 🔒 Security
-
-### Implemented Safeguards
-- **Bounded Collections**: Prevent DOS attacks with max limits (10 admins, 20 modules, 50 selectors)
-- **Selector Validation**: Ensures safe dispatch by validating program IDs
-- **Access Control**: Owner-only critical operations with admin tier
-- **Capacity Limits**: Prevent resource exhaustion and stack overflow
-- **Stack Safety**: All operations within Solana's 4KB stack constraints
-- **Namespace Partitioning**: Prevents selector collisions (EIP-2535 §5 compliant)
-- **Emergency Pause**: Owner can freeze all dispatches with reason message
-- **Immutability Flags**: Mark critical functions as non-replaceable
-
-### Audit Status
-This is beta software under active development. A formal security audit is planned before mainnet deployment. Use at your own risk in production environments.
-
-### Responsible Disclosure
-
-**Found a security vulnerability?** Please report it responsibly:
-
-**📧 Email**: gsknnft@gmail.com
-
-**Please include:**
-- Description of the vulnerability
-- Steps to reproduce
-- Potential impact
-- Suggested fix (optional)
-
-We aim to respond within 48 hours. Security researchers will be credited in our security advisories.
-
-**DO NOT** open public GitHub issues for security vulnerabilities.
+---
 
 ## 🤝 Contributing
 
-We welcome contributions from the community! Whether you're fixing bugs, building facets, or improving documentation, your help is appreciated.
+This is a reference implementation. For contributions to the main protocol, see the parent repository.
 
-**👉 See [CONTRIBUTING.md](./CONTRIBUTING.md) for comprehensive guidelines including:**
-- Development setup and workflow
-- Coding standards and best practices
-- Testing requirements
-- Pull request process
-- Facet development guide
-- Security guidelines
-
-### Quick Contribution Steps
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes with tests
-4. Ensure all tests pass (`anchor test`)
-5. Submit a pull request
-
-### Areas We Need Help With
-
-- 🔧 **Facet Development**: Build new facet programs (DEX, lending, governance)
-- 📝 **Documentation**: Improve guides, add examples, fix typos
-- 🧪 **Testing**: Add test cases, improve coverage, fuzzing
-- 🔒 **Security**: Review code, report vulnerabilities, suggest improvements
-- 🛠️ **Tooling**: CLI tools, SDK enhancements, deployment scripts
-
-## 📚 Documentation
-
-### Essential Reading
-- **[README.diamond.md](./README.diamond.md)** - **START HERE**: Comprehensive MVP overview with architecture, flows, and examples
-- **[FLOW_DIAGRAM.md](./FLOW_DIAGRAM.md)** - Visual flow diagrams for all key processes
-- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Complete contributor guide
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Detailed technical design and implementation
-- **[QUICKSTART.md](./QUICKSTART.md)** - Setup guide and basic usage
-
-### Additional Resources
-- **[SECURITY_REVIEW.md](./SECURITY_REVIEW.md)** - Security analysis and considerations
-- **[WHITEPAPER_OUTLINE.md](./WHITEPAPER_OUTLINE.md)** - Theoretical foundation
-- **EIP-2535 Standard**: [eips.ethereum.org/EIPS/eip-2535](https://eips.ethereum.org/EIPS/eip-2535)
-
-## 🌟 Use Cases
-
-### Token Ecosystems
-- Modular token with swappable transfer logic
-- Tax and fee mechanisms as facets
-- Rewards distribution modules
-
-### DeFi Protocols
-- LP staking and rewards
-- Multi-strategy yield farming
-- Cross-chain bridge integration
-
-### DAO Infrastructure
-- Upgradeable governance
-- Modular proposal types
-- Treasury management facets
-
-### Gaming
-- Upgradeable game logic
-- Item and inventory systems
-- Quest and achievement modules
-
-## 🔗 Links
-
-- **GitHub**: [gsknnft/Solana_Diamond_Protocol_MVP](https://github.com/gsknnft/Solana_Diamond_Protocol_MVP)
-- **SigilNet**: [Cross-chain integration](https://github.com/gsknnft/SigilNet)
-- **EIP-2535**: [Diamond Standard](https://eips.ethereum.org/EIPS/eip-2535)
+---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT
+
+---
 
 ## 🙏 Acknowledgments
 
-- Inspired by Nick Mudge's EIP-2535 Diamond Standard
-- Built with the Anchor Framework
-- Special thanks to the Solana developer community
-
-## 💬 Community & Support
-
-- **GitHub Issues**: [Report bugs or request features](https://github.com/gsknnft/Solana_Diamond_Protocol_MVP/issues)
-- **GitHub Discussions**: [Ask questions and share ideas](https://github.com/gsknnft/Solana_Diamond_Protocol_MVP/discussions)
-- **Security**: security@sigilnet.io (for vulnerability reports only)
+Based on EIP-2535 Diamond Standard, adapted for Solana's account-based model and CPI architecture.
 
 ---
 
-## 🎯 Why This Implementation Matters
-
-This repository represents a **canonical implementation** of the Diamond Standard for Solana, demonstrating:
-
-- 🧭 **Clear Intent**: Production-ready architecture following EIP-2535 principles
-- 🏗️ **Sovereign Design**: Native Solana patterns (CPI, PDAs) instead of Ethereum workarounds
-- 📐 **Clean Architecture**: Minimal, focused, ready for contributors
-- 🔐 **Security-First**: Comprehensive safeguards and validation
-- 📚 **Well-Documented**: Complete guides for understanding and contributing
-- 🧬 **Proven Authorship**: Deep understanding of both Diamond Standard and Solana
-
-Built for the Solana ecosystem by developers who understand modular smart contract architecture.
-
----
-
-**Built with ❤️ for the Solana ecosystem**
-
-*Canonical Diamond Standard implementation demonstrating production-ready patterns, sovereign design, and clear upgrade strategies.*
-
+**Built to demonstrate universal portability. Framework-agnostic by design.**

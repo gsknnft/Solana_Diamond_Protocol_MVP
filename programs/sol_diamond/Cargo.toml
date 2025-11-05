@@ -1,0 +1,15 @@
+[package]
+name = "sol_diamond_mvp"
+version = "0.1.0"
+edition = "2021"
+description = "Minimal Diamond Protocol MVP"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+anchor-lang = "0.31.1"
+anchor-spl = "0.31.1"
+
+[features]
+default = []

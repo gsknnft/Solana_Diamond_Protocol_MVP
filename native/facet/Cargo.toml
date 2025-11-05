@@ -1,8 +1,8 @@
 [package]
-name = "diamond-router-native"
+name = "example-facet-native"
 version = "0.1.0"
 edition = "2021"
-description = "Native Rust Diamond Router - No Anchor"
+description = "Example Native Facet - Counter Demo"
 
 [lib]
 crate-type = ["cdylib", "lib"]
@@ -10,7 +10,6 @@ crate-type = ["cdylib", "lib"]
 [dependencies]
 solana-program = "1.18"
 borsh = "0.10"
-thiserror = "1.0"
 
 [profile.release]
 overflow-checks = true
